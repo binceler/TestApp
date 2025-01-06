@@ -1,12 +1,38 @@
-import { CreateAnimation, IonButton, IonButtons, IonContent, IonHeader, IonMenuButton, IonPage, IonTitle, IonToolbar, useIonViewDidEnter } from '@ionic/react';
+import { CreateAnimation, createGesture, Gesture, GestureDetail, IonButton, IonButtons, IonContent, IonHeader, IonMenuButton, IonPage, IonTitle, IonToolbar, useIonViewDidEnter } from '@ionic/react';
 import React, { useRef } from 'react';
 
 const Tab2: React.FC = () => {
     const animationRef = useRef<CreateAnimation | null>(null);
+    const elementRef = useRef<HTMLDivElement | null>(null);
 
     useIonViewDidEnter(() => {
         animationRef.current?.animation.play();
+        const gesture: Gesture = createGesture({
+            el: elementRef.current!,
+            threshold: 0,
+            gestureName: 'my-gesture',
+            onStart: (ev) => onStartHandler(ev),
+            onMove: (ev) => onMoveHandler(ev),
+            onEnd: (ev) => onMoveEnd(ev),
+        });
+        gesture.enable();
     });
+
+    const onStartHandler = (detail: GestureDetail) => {
+        elementRef.current!.style.transition = 'none';
+    };
+
+    const onMoveHandler = (detail: GestureDetail) => {
+        const x = detail.currentX - detail.startX;
+        const y = detail.currentY - detail.startY;
+
+        elementRef.current!.style.transform = `translate(${x}px, ${y}px)`;
+    };
+
+    const onMoveEnd = (detail: GestureDetail) => {
+        elementRef.current!.style.transition = `500ms ease-out`;
+        elementRef.current!.style.transform = `transform(0px, 0px)`;
+    };
 
     return (
         <IonPage>
@@ -18,7 +44,7 @@ const Tab2: React.FC = () => {
                     <IonTitle>Tab 2</IonTitle>
             </IonToolbar>
             </IonHeader>
-            <IonContent className="ion-padding">
+            <IonContent className="ion-padding" scrollY={false}>
                 <CreateAnimation
                     ref={animationRef}
                     duration={2000}
@@ -34,6 +60,7 @@ const Tab2: React.FC = () => {
                         Join Ionic Academy
                     </IonButton>
                 </CreateAnimation>
+                <div ref={elementRef} style={{ width: 50, height: 50, backgroundColor: 'red' }} />
             </IonContent>
         </IonPage>
     );
